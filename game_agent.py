@@ -393,7 +393,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # Initialize the best move seen to be the illegal move
+        # Initialize the best move seen to be the illegal move for this run
         best_seen = (-1, -1)
 
         # Evaluate the actions we can take from this state
