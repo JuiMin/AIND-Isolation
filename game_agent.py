@@ -65,7 +65,7 @@ def custom_score_2(game, player):
     if player == game.active_player:
         return moves_left - 2 * len(game.get_legal_moves(game.inactive_player))
     else:
-        return len(game.get_legal_moves(game.active_player)) - 2 * moves_left
+        return moves_left - 2 * len(game.get_legal_moves(game.active_player))
 
 
 def custom_score_3(game, player):
@@ -94,7 +94,7 @@ def custom_score_3(game, player):
     if player == game.active_player:
         return moves_left - 3 * len(game.get_legal_moves(game.inactive_player))
     else:
-        return len(game.get_legal_moves(game.active_player)) - 3 * moves_left
+        return moves_left - 3 * len(game.get_legal_moves(game.active_player))
 
 
 class IsolationPlayer:
@@ -133,6 +133,8 @@ class MinimaxPlayer(IsolationPlayer):
     """
     def __init__(self):
         IsolationPlayer.__init__(self)
+        # Init the class variable for the best move to be the illegal move
+        self.best_move = (-1, -1)
 
     def get_move(self, game, time_left):
         """Search for the best move from the available legal moves and return a
@@ -166,18 +168,18 @@ class MinimaxPlayer(IsolationPlayer):
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        best_move = (-1, -1)
+        self.best_move = (-1, -1)
 
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            return self.minimax(game, self.search_depth)
+            self.minimax(game, self.search_depth)
 
         except SearchTimeout:
-            pass
+            return self.best_move
 
         # Return the best move from the last completed search iteration
-        return best_move
+        return self.best_move
 
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
@@ -218,10 +220,18 @@ class MinimaxPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
+        # If the given depth is less than 0, this should be an error and we should stop the game
+        if depth < 0:
+            return self.best_move
+        # If the game is none, then we shouldn't be playing
+        if game is None:
+            return self.best_move
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
         # Init the best value to be lowest possible value
         max_val = float("-inf")
-        # Init best move to be invalid move
-        best_move = (-1, -1)
+
         # Get the legal moves for the active player
         # Iterate over then and find their evaluations until the given depth
         for move in game.get_legal_moves():
@@ -229,15 +239,17 @@ class MinimaxPlayer(IsolationPlayer):
             if move_evaluation > max_val:
                 # If this move was better than the move we had previously then set best move
                 max_val = move_evaluation
-                best_move = move
+                self.best_move = move
         # We have evaluated every move and we can return the best move we found
-        return best_move
+        # return self.best_move
 
     def min_value(self, game, max_depth, current_depth):
         """
         min_value returns the min value of the max evaluations of any child nodes.
         If the given node is a leaf node, return the state evaluation
         """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
         # If the currentDepth == maxDepth then return the utility value of the state (score)
         if max_depth == current_depth:
             # Return the score evaluation of the game
@@ -253,6 +265,8 @@ class MinimaxPlayer(IsolationPlayer):
         """
         max_value returns the max valued move for the active player for the given game
         """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
         # If the currentDepth == maxDepth then return the utility value of the state (score)
         if max_depth == current_depth:
             # Return the score evaluation of the game
@@ -270,6 +284,11 @@ class AlphaBetaPlayer(IsolationPlayer):
     search with alpha-beta pruning. You must finish and test this player to
     make sure it returns a good move before the search time limit expires.
     """
+
+    def __init__(self):
+        IsolationPlayer.__init__(self)
+        # Create a global variable that contains the best move
+        self.best_move = (-1, -1)
 
     def get_move(self, game, time_left):
         """Search for the best move from the available legal moves and return a
