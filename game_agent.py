@@ -90,7 +90,7 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    return game.get_legal_moves(player)
+    return len(game.get_legal_moves(player))
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -126,9 +126,10 @@ class MinimaxPlayer(IsolationPlayer):
     search. You must finish and test this player to make sure it properly uses
     minimax to return a good move before the search time limit expires.
     """
-    def __init__(self):
+    def __init__(self, score_fn=custom_score):
         IsolationPlayer.__init__(self)
         # Init the class variable for the best move to be the illegal move
+        self.score = score_fn
         self.best_move = (-1, -1)
 
     def get_move(self, game, time_left):
@@ -248,14 +249,15 @@ class MinimaxPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
+        moves = game.get_legal_moves()
         # If the currentDepth == maxDepth then return the utility value of the state (score)
-        if max_depth == current_depth:
+        if max_depth == current_depth or len(moves) == 0:
             # Return the score evaluation of the game
             return self.score(game, self)
         # Init v to be negative infinity
         v = float("inf")
         # For each legal move, check to see what we can DO
-        for move in game.get_legal_moves():
+        for move in moves:
             v = min(v, self.max_value(game.forecast_move(move), max_depth, current_depth + 1))
         return v
 
@@ -265,26 +267,28 @@ class MinimaxPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
+        moves = game.get_legal_moves()
         # If the currentDepth == maxDepth then return the utility value of the state (score)
-        if max_depth == current_depth:
+        if max_depth == current_depth or len(moves) == 0:
             # Return the score evaluation of the game
             return self.score(game, self)
         # Init v to be negative infinity
         v = float("-inf")
         # For each legal move, check to see what we can DO
-        for move in game.get_legal_moves():
+        for move in moves:
             v = max(v, self.min_value(game.forecast_move(move), max_depth, current_depth + 1))
         return v
 
 
-class AlphaBetaPlayer(IsolationPlayer):
+class AlphaBetaPlayer(IsolationPlayer): 
     """Game-playing agent that chooses a move using iterative deepening minimax
     search with alpha-beta pruning. You must finish and test this player to
     make sure it returns a good move before the search time limit expires.
     """
 
-    def __init__(self):
+    def __init__(self, score_fn=custom_score):
         IsolationPlayer.__init__(self)
+        self.score = score_fn
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
         self.best_move = (-1, -1)
@@ -328,7 +332,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             # Initialize search depth to 0
             depth = 0
             # While the timer still has time left
-            while (self.time_left() >= self.TIMER_THRESHOLD):
+            while self.time_left() >= self.TIMER_THRESHOLD:
                 # Run the alpha beta with the given depth
                 # If we finish once, we can update the best move,
                 # if we don't finish, use the best move for the last complete
@@ -393,8 +397,9 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # Initialize the best move seen to be the illegal move for this run
-        best_seen = (-1, -1)
+        # Initialize the best move seen for the current best run to be the
+        # best move from the last run
+        best_seen = self.best_move
 
         # Evaluate the actions we can take from this state
         for move in game.get_legal_moves():
@@ -404,7 +409,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             if val > alpha:
                 alpha = val
                 best_seen = move
-        
+
         # Give back the best seen move
         return best_seen
 
@@ -417,14 +422,14 @@ class AlphaBetaPlayer(IsolationPlayer):
             raise SearchTimeout()
         # If this is a terminal node, return the evaluation using the score
         if max_depth == current_depth:
-            return self.score(game)
+            return self.score(game, self)
         # If this is not a terminal node, check to see if we can do any pruning
         # Start looking through moves
         for move in game.get_legal_moves():
-            # Get the maximizing value from 
+            # Get the maximizing value from
             val = self.maximizing(game.forecast_move(move), max_depth, current_depth + 1, alpha, beta)
             # Since we are minimizing, if we see a lesser greater than alpha, (evaluation
-            # of the previous nodes, we can prune the rest of the nodes) 
+            # of the previous nodes, we can prune the rest of the nodes)
             if val < alpha:
                 return val
             # Check if the value we get is less then our passed in beta
@@ -435,7 +440,6 @@ class AlphaBetaPlayer(IsolationPlayer):
         # since that has the highest value
         return beta
 
-
     def maximizing(self, game, max_depth, current_depth, alpha, beta):
         """
             maximizing node for the alpha beta player
@@ -445,14 +449,14 @@ class AlphaBetaPlayer(IsolationPlayer):
             raise SearchTimeout()
         # If this is a terminal node, return the evaluation using the score
         if max_depth == current_depth:
-            return self.score(game)
+            return self.score(game, self)
         # If this is not a terminal node, check to see if we can do any pruning
         # Start looking through moves
         for move in game.get_legal_moves():
-            # Get the maximizing value from 
+            # Get the maximizing value from
             val = self.maximizing(game.forecast_move(move), max_depth, current_depth + 1, alpha, beta)
             # Since we are maximizing, if we see a value greater than beta, (evaluation
-            # of the previous nodes, we can prune the rest of the nodes) 
+            # of the previous nodes, we can prune the rest of the nodes)
             if val > beta:
                 return val
             # Check if the value we get is greater than our passed in alpha
@@ -462,4 +466,3 @@ class AlphaBetaPlayer(IsolationPlayer):
         # If we looked through all the nodes, return the alpha
         # since that has the highest value
         return alpha
-
