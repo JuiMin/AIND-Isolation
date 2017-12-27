@@ -422,7 +422,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         # Start looking through moves
         for move in game.get_legal_moves():
             # Get the maximizing value from 
-            val = self.maximizing(game.forecast_move(move), depth, current_depth + 1, alpha, beta)
+            val = self.maximizing(game.forecast_move(move), max_depth, current_depth + 1, alpha, beta)
             # Since we are minimizing, if we see a lesser greater than alpha, (evaluation
             # of the previous nodes, we can prune the rest of the nodes) 
             if val < alpha:
@@ -450,7 +450,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         # Start looking through moves
         for move in game.get_legal_moves():
             # Get the maximizing value from 
-            val = self.maximizing(game.forecast_move(move), depth, current_depth + 1, alpha, beta)
+            val = self.maximizing(game.forecast_move(move), max_depth, current_depth + 1, alpha, beta)
             # Since we are maximizing, if we see a value greater than beta, (evaluation
             # of the previous nodes, we can prune the rest of the nodes) 
             if val > beta:
