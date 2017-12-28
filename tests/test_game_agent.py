@@ -21,9 +21,9 @@ class IsolationTest(unittest.TestCase):
         self.player2 = sample_players.GreedyPlayer()
         self.player3 = sample_players.RandomPlayer()
         self.player4 = game_agent.AlphaBetaPlayer()
+        self.player5 = game_agent.AlphaBetaPlayer()
+        self.player6 = game_agent.MinimaxPlayer()
         self.game = None
-        print("game setup complete\n")
-
 
     def test_minimax_none_game(self):
         """
@@ -66,7 +66,9 @@ class IsolationTest(unittest.TestCase):
         winners = {}
         reasons = {}
 
-        for x in range(0, 50):
+        print("Minimax vs. Random")
+
+        for x in range(0, 10):
             # Set the game board
             self.game = isolation.Board(self.player1, self.player3)
             results = self.game.play()
@@ -92,7 +94,9 @@ class IsolationTest(unittest.TestCase):
         winners = {}
         reasons = {}
 
-        for x in range(0, 50):
+        print("Minimax vs. Greedy")
+
+        for x in range(0, 10):
             # Set the game board
             self.game = isolation.Board(self.player1, self.player2)
             results = self.game.play()
@@ -117,6 +121,8 @@ class IsolationTest(unittest.TestCase):
         """
         winners = {}
         reasons = {}
+
+        print("Alpha Beta vs. Random")
 
         for x in range(0, 10):
             # Set the game board
@@ -144,9 +150,95 @@ class IsolationTest(unittest.TestCase):
         winners = {}
         reasons = {}
 
+        print("Alpha Beta vs. Greedy")
+
         for x in range(0, 10):
             # Set the game board
             self.game = isolation.Board(self.player4, self.player2)
+            results = self.game.play()
+            # Print the winners
+            if results[0] in winners:
+                winners[results[0]] = winners[results[0]] + 1
+            else:
+                winners[results[0]] = 1
+
+            # Print the reasons for losing
+            if results[2] in reasons:
+                reasons[results[2]] = reasons[results[2]] + 1
+            else:
+                reasons[results[2]] = 1
+
+        print(winners)
+        print(reasons)
+
+    def test_alphabeta_minimax(self):
+        """
+        Test the game with the given players
+        """
+        winners = {}
+        reasons = {}
+
+        print("Alpha Beta vs. Minimax")
+
+        for x in range(0, 10):
+            # Set the game board
+            self.game = isolation.Board(self.player4, self.player1)
+            results = self.game.play()
+            # Print the winners
+            if results[0] in winners:
+                winners[results[0]] = winners[results[0]] + 1
+            else:
+                winners[results[0]] = 1
+
+            # Print the reasons for losing
+            if results[2] in reasons:
+                reasons[results[2]] = reasons[results[2]] + 1
+            else:
+                reasons[results[2]] = 1
+
+        print(winners)
+        print(reasons)
+
+    def test_alphabeta_alphabeta(self):
+        """
+        Test the game with the given players
+        """
+        winners = {}
+        reasons = {}
+
+        print("Alpha Beta vs. Alpha Beta")
+
+        for x in range(0, 10):
+            # Set the game board
+            self.game = isolation.Board(self.player4, self.player5)
+            results = self.game.play()
+            # Print the winners
+            if results[0] in winners:
+                winners[results[0]] = winners[results[0]] + 1
+            else:
+                winners[results[0]] = 1
+
+            # Print the reasons for losing
+            if results[2] in reasons:
+                reasons[results[2]] = reasons[results[2]] + 1
+            else:
+                reasons[results[2]] = 1
+
+        print(winners)
+        print(reasons)
+
+    def test_minimax_minimax(self):
+        """
+        Test the game with the given players
+        """
+        winners = {}
+        reasons = {}
+
+        print("Minimax vs. Minimax")
+
+        for x in range(0, 10):
+            # Set the game board
+            self.game = isolation.Board(self.player6, self.player1)
             results = self.game.play()
             # Print the winners
             if results[0] in winners:

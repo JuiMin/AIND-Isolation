@@ -32,11 +32,11 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    moves_left = len(game.get_legal_moves(player))
-    if player == game.active_player:
-        return moves_left - len(game.get_legal_moves(game.inactive_player))
-    else:
-        return moves_left - len(game.get_legal_moves(game.active_player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    if opponent_moves == 0:
+        return len(game.get_legal_moves(player))
+    return len(game.get_legal_moves(player)) / (2 *len(game.get_legal_moves(game.get_opponent(player))))
+
 
 
 def custom_score_2(game, player):
@@ -61,11 +61,7 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    moves_left = len(game.get_legal_moves(player))
-    if player == game.active_player:
-        return moves_left - 2 * len(game.get_legal_moves(game.inactive_player))
-    else:
-        return moves_left - 2 * len(game.get_legal_moves(game.active_player))
+    return len(game.get_legal_moves(player)) - 2 * len(game.get_legal_moves(game.get_opponent(player)))
 
 
 def custom_score_3(game, player):
@@ -90,7 +86,7 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    return len(game.get_legal_moves(player))
+    return 2 * len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.get_opponent(player)))
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -232,15 +228,16 @@ class MinimaxPlayer(IsolationPlayer):
         # Iterate over then and find their evaluations until the given depth
         for move in game.get_legal_moves():
             move_evaluation = self.min_value(game.forecast_move(move), depth, 0)
-            if move_evaluation > max_val:
+            # If the best move is illegal then replace it since we have a possible move we could make
+            if self.best_move == (-1, -1) and move_evaluation == float("-inf"):
+                self.best_move = move
+            elif move_evaluation > max_val:
                 # If this move was better than the move we had previously then set best move
                 max_val = move_evaluation
                 # Since we only set the best move once we fully evaluate a move to the given depth,
                 # We are guaranteed the best result for each move we have seen (since we don't
                 # want a decision that is based off incomplete searching)
                 self.best_move = move
-        # We have evaluated every move and we can return the best move we found
-        # return self.best_move
 
     def min_value(self, game, max_depth, current_depth):
         """
@@ -251,7 +248,7 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
         moves = game.get_legal_moves()
         # If the currentDepth == maxDepth then return the utility value of the state (score)
-        if max_depth == current_depth or len(moves) == 0:
+        if max_depth == current_depth:
             # Return the score evaluation of the game
             return self.score(game, self)
         # Init v to be negative infinity
@@ -269,7 +266,7 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
         moves = game.get_legal_moves()
         # If the currentDepth == maxDepth then return the utility value of the state (score)
-        if max_depth == current_depth or len(moves) == 0:
+        if max_depth == current_depth:
             # Return the score evaluation of the game
             return self.score(game, self)
         # Init v to be negative infinity
@@ -280,7 +277,7 @@ class MinimaxPlayer(IsolationPlayer):
         return v
 
 
-class AlphaBetaPlayer(IsolationPlayer): 
+class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
     search with alpha-beta pruning. You must finish and test this player to
     make sure it returns a good move before the search time limit expires.
