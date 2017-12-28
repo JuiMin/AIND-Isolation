@@ -34,7 +34,7 @@ def custom_score(game, player):
     """
     opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
     if opponent_moves == 0:
-        return len(game.get_legal_moves(player))
+        return len(game.get_legal_moves(player)) 
     return len(game.get_legal_moves(player)) / (2 *len(game.get_legal_moves(game.get_opponent(player))))
 
 
@@ -57,7 +57,7 @@ def custom_score_2(game, player):
         one of the player objects `game.__player_1__` or `game.__player_2__`.)
 
     Returns
-    -------
+    -------len(game.ge
     float
         The heuristic value of the current game state to the specified player.
     """
