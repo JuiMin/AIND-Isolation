@@ -400,11 +400,13 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         # Initialize the best move seen for the current best run to be the
         # best move from the last run
-        best_seen = self.best_move
+        best_seen = (-1, -1)
         val = float("-inf")
 
+        # Get all legal moves
+        legal_moves = game.get_legal_moves()
         # Evaluate the actions we can take from this state
-        for move in game.get_legal_moves():
+        for move in legal_moves:
             # Get the evaluation for maximizing this move0
             temp = self.minimizing(game.forecast_move(move), depth, 1, alpha, beta)
             # If this value is greater than the best val seen then we can set the val
@@ -417,6 +419,10 @@ class AlphaBetaPlayer(IsolationPlayer):
                 return best_seen
             # Set the alpha if the value is bigger
             alpha = max(val, alpha)
+        # If the best seen is still the illegal move and we have moves to play
+        # then we can send back the first one
+        if best_seen == (-1, -1) and len(legal_moves) > 0:
+            return legal_moves[0]
         # Give back the best seen move
         return best_seen
 
