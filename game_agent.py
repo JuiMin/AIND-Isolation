@@ -32,10 +32,12 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    if opponent_moves == 0:
-        return len(game.get_legal_moves(player)) 
-    return len(game.get_legal_moves(player)) / (2 *len(game.get_legal_moves(game.get_opponent(player))))
+    blanks = len(game.get_blank_spaces())
+    board = game.width * game.height
+    aggressive = float(len(game.get_legal_moves(player)) - (2 * len(game.get_legal_moves(game.get_opponent(player)))))
+    defensive = float((2 * len(game.get_legal_moves(player))) - len(game.get_legal_moves(game.get_opponent(player))))
+    return float(((blanks / board) * aggressive) + ((1 - (blanks/board)) * defensive))
+    
 
 
 
@@ -61,7 +63,7 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    return float(len(game.get_legal_moves(player)) - 2 * len(game.get_legal_moves(game.get_opponent(player))))
+    return float(len(game.get_legal_moves(player)) - (2 * len(game.get_legal_moves(game.get_opponent(player)))))
 
 
 def custom_score_3(game, player):
@@ -86,7 +88,7 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    return float(2 * len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.get_opponent(player))))
+    return float((2 * len(game.get_legal_moves(player))) - len(game.get_legal_moves(game.get_opponent(player))))
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
